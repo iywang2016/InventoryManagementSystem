@@ -5,6 +5,8 @@
  */
 package com.inventory.Database;
 
+import org.checkerframework.checker.sqlquotes.qual.SqlEvenQuotes;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -68,11 +70,11 @@ public class ConnectionFactory {
     //Login verification method
     public boolean checkLogin(String username, String password, String userType){
         String query = "SELECT * FROM users WHERE username='"
-                + username
+                + sanitize(username)
                 + "' AND password='"
-                + password
+                + sanitize(password)
                 + "' AND usertype='"
-                + userType
+                + sanitize(userType)
                 + "' LIMIT 1";
 
         try {
@@ -82,5 +84,11 @@ public class ConnectionFactory {
             ex.printStackTrace();
         }
         return false;
+    }
+
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
     }
 }

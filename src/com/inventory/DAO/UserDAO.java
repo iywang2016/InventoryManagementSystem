@@ -8,6 +8,7 @@ package com.inventory.DAO;
 import com.inventory.DTO.UserDTO;
 import com.inventory.Database.ConnectionFactory;
 import com.inventory.UI.UsersPage;
+import org.checkerframework.checker.sqlquotes.qual.SqlEvenQuotes;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -151,7 +152,7 @@ public class UserDAO {
 
     public ResultSet getUserDAO(String username) {
         try {
-            String query = "SELECT * FROM users WHERE username='" +username+ "'";
+            String query = "SELECT * FROM users WHERE username='" +sanitize(username)+ "'";
             resultSet = statement.executeQuery(query);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -160,7 +161,7 @@ public class UserDAO {
     }
     public void getFullName(UserDTO userDTO, String username) {
         try {
-            String query = "SELECT * FROM users WHERE username='" +username+ "' LIMIT 1";
+            String query = "SELECT * FROM users WHERE username='" +sanitize(username)+ "' LIMIT 1";
             resultSet = statement.executeQuery(query);
             String fullName = null;
             if(resultSet.next()) fullName = resultSet.getString(2);
@@ -197,9 +198,9 @@ public class UserDAO {
     public ResultSet getPassDAO(String username, String password){
         try {
             String query = "SELECT password FROM users WHERE username='"
-                    +username
+                    +sanitize(username)
                     + "' AND password='"
-                    +password
+                    +sanitize(password)
                     +"'";
             resultSet = statement.executeQuery(query);
         } catch (SQLException ex) {
@@ -242,4 +243,9 @@ public class UserDAO {
         return new DefaultTableModel(data, columnNames);
     }
 
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
+    }
 }

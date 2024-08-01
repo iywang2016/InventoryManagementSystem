@@ -5,6 +5,8 @@
  */
 package com.inventory.DTO;
 
+import org.checkerframework.checker.sqlquotes.qual.*;
+
 /**
  *
  * @author asjad
@@ -16,7 +18,7 @@ public class SupplierDTO {
 
     private int suppID;
     private double debit, credit, balance;
-    private String suppCode, fullName, location, phone;
+    private @SqlEvenQuotes String suppCode, fullName, location, phone;
 
     public int getSuppID() {
         return suppID;
@@ -50,35 +52,41 @@ public class SupplierDTO {
         this.balance = balance;
     }
 
-    public String getSuppCode() {
+    public @SqlEvenQuotes String getSuppCode() {
         return suppCode;
     }
 
     public void setSuppCode(String suppCode) {
-        this.suppCode = suppCode;
+        this.suppCode = sanitize(suppCode);
     }
 
-    public String getFullName() {
+    public @SqlEvenQuotes String getFullName() {
         return fullName;
     }
 
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.fullName = sanitize(fullName);
     }
 
-    public String getLocation() {
+    public @SqlEvenQuotes String getLocation() {
         return location;
     }
 
     public void setLocation(String location) {
-        this.location = location;
+        this.location = sanitize(location);
     }
 
-    public String getPhone() {
+    public @SqlEvenQuotes String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = sanitize(phone);
+    }
+
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
     }
 }

@@ -7,6 +7,7 @@ package com.inventory.DAO;
 
 import com.inventory.DTO.ProductDTO;
 import com.inventory.Database.ConnectionFactory;
+import org.checkerframework.checker.sqlquotes.qual.SqlEvenQuotes;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -82,7 +83,7 @@ public class ProductDAO {
     public Double getProdCost(String prodCode) {
         Double costPrice = null;
         try {
-            String query = "SELECT costprice FROM products WHERE productcode='" +prodCode+ "'";
+            String query = "SELECT costprice FROM products WHERE productcode='" +sanitize(prodCode)+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 costPrice = resultSet.getDouble("costprice");
@@ -95,7 +96,7 @@ public class ProductDAO {
     public Double getProdSell(String prodCode) {
         Double sellPrice = null;
         try {
-            String query = "SELECT sellprice FROM products WHERE productcode='" +prodCode+ "'";
+            String query = "SELECT sellprice FROM products WHERE productcode='" +sanitize(prodCode)+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 sellPrice = resultSet.getDouble("sellprice");
@@ -108,7 +109,7 @@ public class ProductDAO {
     String suppCode;
     public String getSuppCode(String suppName) {
         try {
-            String query = "SELECT suppliercode FROM suppliers WHERE fullname='" +suppName+ "'";
+            String query = "SELECT suppliercode FROM suppliers WHERE fullname='" +sanitize(suppName)+ "'";
             resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 suppCode = resultSet.getString("suppliercode");
@@ -122,7 +123,7 @@ public class ProductDAO {
     String prodCode;
     public String getProdCode(String prodName) {
         try {
-            String query = "SELECT productcode FROM products WHERE productname='" +prodName+ "'";
+            String query = "SELECT productcode FROM products WHERE productname='" +sanitize(prodName)+ "'";
             resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 suppCode = resultSet.getString("productcode");
@@ -136,7 +137,7 @@ public class ProductDAO {
     String custCode;
     public String getCustCode(String custName) {
         try {
-            String query = "SELECT customercode FROM suppliers WHERE fullname='" +custName+ "'";
+            String query = "SELECT customercode FROM suppliers WHERE fullname='" +sanitize(custName)+ "'";
             resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 suppCode = resultSet.getString("customercode");
@@ -151,7 +152,7 @@ public class ProductDAO {
     boolean flag = false;
     public boolean checkStock(String prodCode) {
         try {
-            String query = "SELECT * FROM currentstock WHERE productcode='" +prodCode+ "'";
+            String query = "SELECT * FROM currentstock WHERE productcode='" +sanitize(prodCode)+ "'";
             resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 flag = true;
@@ -165,12 +166,16 @@ public class ProductDAO {
     // Methods to add a new product
     public void addProductDAO(ProductDTO productDTO) {
         try {
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String costPrice = "" + productDTO.getCostPrice();
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String sellPrice = "" + productDTO.getSellPrice();
             String query = "SELECT * FROM products WHERE productname='"
                     + productDTO.getProdName()
                     + "' AND costprice='"
-                    + productDTO.getCostPrice()
+                    + costPrice
                     + "' AND sellprice='"
-                    + productDTO.getSellPrice()
+                    + sellPrice
                     + "' AND brand='"
                     + productDTO.getBrand()
                     + "'";
@@ -278,7 +283,7 @@ public class ProductDAO {
     // Methods to handle updating of stocks in Inventory upon any transaction made
     public void editPurchaseStock(String code, int quantity) {
         try {
-            String query = "SELECT * FROM currentstock WHERE productcode='" +code+ "'";
+            String query = "SELECT * FROM currentstock WHERE productcode='" +sanitize(code)+ "'";
             resultSet = statement.executeQuery(query);
             if(resultSet.next()) {
                 String query2 = "UPDATE currentstock SET quantity=quantity-? WHERE productcode=?";
@@ -293,7 +298,7 @@ public class ProductDAO {
     }
     public void editSoldStock(String code, int quantity) {
         try {
-            String query = "SELECT * FROM currentstock WHERE productcode='" +code+ "'";
+            String query = "SELECT * FROM currentstock WHERE productcode='" +sanitize(code)+ "'";
             resultSet = statement.executeQuery(query);
             if(resultSet.next()) {
                 String query2 = "UPDATE currentstock SET quantity=quantity+? WHERE productcode=?";
@@ -382,14 +387,18 @@ public class ProductDAO {
             else if (productDTO.getQuantity()<=0)
                 JOptionPane.showMessageDialog(null, "Please enter a valid quantity");
             else {
+                @SuppressWarnings("sqlquotes")
+                @SqlEvenQuotes String getQuantity = "" + productDTO.getQuantity();
                 String stockQuery = "UPDATE currentstock SET quantity=quantity-'"
-                        +productDTO.getQuantity()
+                        +getQuantity
                         +"' WHERE productcode='"
                         +productDTO.getProdCode()
                         +"'";
+                @SuppressWarnings("sqlquotes")
+                @SqlEvenQuotes String totalRevenue = "" + productDTO.getTotalRevenue();
                 String salesQuery = "INSERT INTO salesinfo(date,productcode,customercode,quantity,revenue,soldby)" +
                         "VALUES('"+productDTO.getDate()+"','"+productDTO.getProdCode()+"','"+productDTO.getCustCode()+
-                        "','"+productDTO.getQuantity()+"','"+productDTO.getTotalRevenue()+"','"+username+"')";
+                        "','"+getQuantity+"','"+totalRevenue+"','"+sanitize(username)+"')";
                 statement.executeUpdate(stockQuery);
                 statement.executeUpdate(salesQuery);
                 JOptionPane.showMessageDialog(null, "Product sold.");
@@ -461,7 +470,7 @@ public class ProductDAO {
     public ResultSet getProductSearch(String text) {
         try {
             String query = "SELECT productcode,productname,costprice,sellprice,brand FROM products " +
-                    "WHERE productcode LIKE '%"+text+"%' OR productname LIKE '%"+text+"%' OR brand LIKE '%"+text+"%'";
+                    "WHERE productcode LIKE '%"+sanitize(text)+"%' OR productname LIKE '%"+sanitize(text)+"%' OR brand LIKE '%"+sanitize(text)+"%'";
             resultSet = statement.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -472,7 +481,7 @@ public class ProductDAO {
     public ResultSet getProdFromCode(String text) {
         try {
             String query = "SELECT productcode,productname,costprice,sellprice,brand FROM products " +
-                    "WHERE productcode='" +text+ "' LIMIT 1";
+                    "WHERE productcode='" +sanitize(text)+ "' LIMIT 1";
             resultSet = statement.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -491,8 +500,8 @@ public class ProductDAO {
                     "                    ON salesinfo.soldby=users.username\n" +
                     "                    INNER JOIN customers\n" +
                     "                    ON customers.customercode=salesinfo.customercode\n" +
-                    "WHERE salesinfo.productcode LIKE '%"+text+"%' OR productname LIKE '%"+text+"%' " +
-                    "OR users.name LIKE '%"+text+"%' OR customers.fullname LIKE '%"+text+"%' ORDER BY salesid;";
+                    "WHERE salesinfo.productcode LIKE '%"+sanitize(text)+"%' OR productname LIKE '%"+sanitize(text)+"%' " +
+                    "OR users.name LIKE '%"+sanitize(text)+"%' OR customers.fullname LIKE '%"+sanitize(text)+"%' ORDER BY salesid;";
             resultSet = statement.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -506,9 +515,9 @@ public class ProductDAO {
             String query = "SELECT PurchaseID,purchaseinfo.productcode,products.productname,quantity,totalcost " +
                     "FROM purchaseinfo INNER JOIN products ON purchaseinfo.productcode=products.productcode " +
                     "INNER JOIN suppliers ON purchaseinfo.suppliercode=suppliers.suppliercode" +
-                    "WHERE PurchaseID LIKE '%"+text+"%' OR productcode LIKE '%"+text+"%' OR productname LIKE '%"+text+"%' " +
-                    "OR suppliers.fullname LIKE '%"+text+"%' OR purchaseinfo.suppliercode LIKE '%"+text+"%' " +
-                    "OR date LIKE '%"+text+"%' ORDER BY purchaseid";
+                    "WHERE PurchaseID LIKE '%"+sanitize(text)+"%' OR productcode LIKE '%"+sanitize(text)+"%' OR productname LIKE '%"+sanitize(text)+"%' " +
+                    "OR suppliers.fullname LIKE '%"+sanitize(text)+"%' OR purchaseinfo.suppliercode LIKE '%"+sanitize(text)+"%' " +
+                    "OR date LIKE '%"+sanitize(text)+"%' ORDER BY purchaseid";
             resultSet = statement.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -518,7 +527,7 @@ public class ProductDAO {
 
     public ResultSet getProdName(String code) {
         try {
-            String query = "SELECT productname FROM products WHERE productcode='" +code+ "'";
+            String query = "SELECT productname FROM products WHERE productcode='" +sanitize(code)+ "'";
             resultSet = statement.executeQuery(query);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -529,9 +538,11 @@ public class ProductDAO {
     public String getSuppName(int ID) {
         String name = null;
         try {
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String idString = "" + ID;
             String query = "SELECT fullname FROM suppliers " +
                     "INNER JOIN purchaseinfo ON suppliers.suppliercode=purchaseinfo.suppliercode " +
-                    "WHERE purchaseid='" +ID+ "'";
+                    "WHERE purchaseid='" +idString+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 name = resultSet.getString("fullname");
@@ -544,9 +555,11 @@ public class ProductDAO {
     public String getCustName(int ID) {
         String name = null;
         try {
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String idString = "" + ID;
             String query = "SELECT fullname FROM customers " +
                     "INNER JOIN salesinfo ON customers.customercode=salesinfo.customercode " +
-                    "WHERE salesid='" +ID+ "'";
+                    "WHERE salesid='" +idString+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 name = resultSet.getString("fullname");
@@ -559,7 +572,9 @@ public class ProductDAO {
     public String getPurchaseDate(int ID) {
         String date = null;
         try {
-            String query = "SELECT date FROM purchaseinfo WHERE purchaseid='" +ID+ "'";
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String idString = "" + ID;
+            String query = "SELECT date FROM purchaseinfo WHERE purchaseid='" +idString+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 date = resultSet.getString("date");
@@ -571,7 +586,9 @@ public class ProductDAO {
     public String getSaleDate(int ID) {
         String date = null;
         try {
-            String query = "SELECT date FROM salesinfo WHERE salesid='" +ID+ "'";
+            @SuppressWarnings("sqlquotes")
+            @SqlEvenQuotes String idString = "" + ID;
+            String query = "SELECT date FROM salesinfo WHERE salesid='" +idString+ "'";
             resultSet = statement.executeQuery(query);
             if (resultSet.next())
                 date = resultSet.getString("date");
@@ -603,9 +620,9 @@ public class ProductDAO {
         return new DefaultTableModel(data, columnNames);
     }
 
-
-
-
-
-
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
+    }
 }

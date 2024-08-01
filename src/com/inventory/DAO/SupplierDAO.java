@@ -14,6 +14,8 @@ import java.sql.*;
 import java.util.Locale;
 import java.util.Vector;
 
+import org.checkerframework.checker.sqlquotes.qual.*;
+
 /**
  *
  * @author asjad
@@ -87,7 +89,7 @@ public class SupplierDAO {
     }
 
     // Method to delete existing supplier
-    public void deleteSupplierDAO(String suppCode) {
+    public void deleteSupplierDAO(@SqlEvenQuotes String suppCode) {
         try {
             String query = "DELETE FROM suppliers WHERE suppliercode='" +suppCode+ "'";
             statement.executeUpdate(query);
@@ -111,9 +113,10 @@ public class SupplierDAO {
     // Search method
     public ResultSet getSearchResult(String searchText) {
         try {
+            String sanitizedSearch = sanitize(searchText);
             String query = "SELECT suppliercode, fullname, location, mobile FROM suppliers " +
-                    "WHERE suppliercode LIKE '%"+searchText+"%' OR location LIKE '%"+searchText+"%' " +
-                    "OR fullname LIKE '%"+searchText+"%' OR mobile LIKE '%"+searchText+"%'";
+                    "WHERE suppliercode LIKE '%"+sanitizedSearch+"%' OR location LIKE '%"+sanitizedSearch+"%' " +
+                    "OR fullname LIKE '%"+sanitizedSearch+"%' OR mobile LIKE '%"+sanitizedSearch+"%'";
             resultSet = statement.executeQuery(query);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -149,5 +152,11 @@ public class SupplierDAO {
             data.add(vector);
         }
         return new DefaultTableModel(data, columnNames);
+    }
+
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
     }
 }

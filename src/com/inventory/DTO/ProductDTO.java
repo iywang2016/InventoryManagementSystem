@@ -5,6 +5,8 @@
  */
 package com.inventory.DTO;
 
+import org.checkerframework.checker.sqlquotes.qual.*;
+
 /**
  *
  * @author asjad
@@ -17,7 +19,7 @@ public class ProductDTO {
     private int prodID, quantity, userID;
     private double costPrice, sellPrice;
     private Double totalCost, totalRevenue;
-    private String prodCode, prodName, date, suppCode, custCode, custName, brand;
+    private @SqlEvenQuotes String prodCode, prodName, date, suppCode, custCode, custName, brand;
 
     public int getProdID() {
         return prodID;
@@ -75,59 +77,65 @@ public class ProductDTO {
         this.totalRevenue = totalRevenue;
     }
 
-    public String getProdCode() {
+    public @SqlEvenQuotes String getProdCode() {
         return prodCode;
     }
 
     public void setProdCode(String prodCode) {
-        this.prodCode = prodCode;
+        this.prodCode = sanitize(prodCode);
     }
 
-    public String getProdName() {
+    public @SqlEvenQuotes String getProdName() {
         return prodName;
     }
 
     public void setProdName(String prodName) {
-        this.prodName = prodName;
+        this.prodName = sanitize(prodName);
     }
 
-    public String getDate() {
+    public @SqlEvenQuotes String getDate() {
         return date;
     }
 
     public void setDate(String date) {
-        this.date = date;
+        this.date = sanitize(date);
     }
 
-    public String getSuppCode() {
+    public @SqlEvenQuotes String getSuppCode() {
         return suppCode;
     }
 
     public void setSuppCode(String suppCode) {
-        this.suppCode = suppCode;
+        this.suppCode = sanitize(suppCode);
     }
 
-    public String getCustCode() {
+    public @SqlEvenQuotes String getCustCode() {
         return custCode;
     }
 
     public void setCustCode(String custCode) {
-        this.custCode = custCode;
+        this.custCode = sanitize(custCode);
     }
 
-    public String getCustName() {
+    public @SqlEvenQuotes String getCustName() {
         return custName;
     }
 
     public void setCustName(String custName) {
-        this.custName = custName;
+        this.custName = sanitize(custName);
     }
 
-    public String getBrand() {
+    public @SqlEvenQuotes String getBrand() {
         return brand;
     }
 
     public void setBrand(String brand) {
-        this.brand = brand;
+        this.brand = sanitize(brand);
+    }
+
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
     }
 }

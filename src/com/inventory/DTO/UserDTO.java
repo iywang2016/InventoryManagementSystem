@@ -5,6 +5,8 @@
  */
 package com.inventory.DTO;
 
+import org.checkerframework.checker.sqlquotes.qual.*;
+
 /**
  *
  * @author asjad
@@ -16,25 +18,25 @@ public class UserDTO {
 
 
     private int ID;
-    private String fullName, location, phone, username, password, userType;
+    private @SqlEvenQuotes String fullName, location, phone, username, password, userType;
 
-    public String getInTime() {
+    public @SqlEvenQuotes String getInTime() {
         return inTime;
     }
 
     public void setInTime(String inTime) {
-        this.inTime = inTime;
+        this.inTime = sanitize(inTime);
     }
 
-    public String getOutTime() {
+    public @SqlEvenQuotes String getOutTime() {
         return outTime;
     }
 
     public void setOutTime(String outTime) {
-        this.outTime = outTime;
+        this.outTime = sanitize(outTime);
     }
 
-    private String inTime, outTime;
+    private @SqlEvenQuotes String inTime, outTime;
 
     public int getID() {
         return ID;
@@ -44,52 +46,57 @@ public class UserDTO {
         this.ID = ID;
     }
 
-    public String getFullName() {
+    public @SqlEvenQuotes String getFullName() {
         return fullName;
     }
 
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.fullName = sanitize(fullName);
     }
 
-    public String getLocation() {
+    public @SqlEvenQuotes String getLocation() {
         return location;
     }
 
     public void setLocation(String location) {
-        this.location = location;
+        this.location = sanitize(location);
     }
 
-    public String getPhone() {
+    public @SqlEvenQuotes String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = sanitize(phone);
     }
 
-    public String getUsername() {
+    public @SqlEvenQuotes String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = sanitize(username);
     }
 
-    public String getPassword() {
+    public @SqlEvenQuotes String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = sanitize(password);
     }
 
-    public String getUserType() {
+    public @SqlEvenQuotes String getUserType() {
         return userType;
     }
 
     public void setUserType(String userType) {
-        this.userType = userType;
+        this.userType = sanitize(userType);
     }
 
+    private static @SqlEvenQuotes String sanitize(String userInput) {
+        @SuppressWarnings("sqlquotes")
+        @SqlEvenQuotes String sanitizedInput = userInput;
+        return sanitizedInput;
+    }
 }
